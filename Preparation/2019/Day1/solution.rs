@@ -6,9 +6,15 @@ fn main() -> io::Result<()> {
 
     let file = File::open("input.txt")?;
     let reader = BufReader::new(file);
+    
+    let mut totalFuel : i64 = 0;
 
-    for line in reader.lines() {
-        println!("{}", line?);
+    for number in reader.lines().map(|l| l.unwrap().parse::<i64>()) {
+        let mass = number.unwrap();
+        let fuel = mass / 3 - 2;
+        totalFuel += fuel;
+        println!("{} {} -> total fuel {}", mass, fuel, totalFuel);
+
     }
 
     Ok(())

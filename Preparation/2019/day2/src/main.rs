@@ -1,4 +1,4 @@
-use itertools::Itertools;
+// use itertools::Itertools;
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
 
@@ -19,34 +19,32 @@ fn main() -> io::Result<()> {
     // let line = "2,4,4,5,99,0";
     // let line = "1,1,1,4,99,5,6,0,99";
 
-    let mut program: Vec<i64> = line
-        .split(",")
-        .map(|n| n.parse::<i64>().expect("Expected Integer String"))
-        .collect();
-
-    let mut pc: usize = 0;
-
-    // adjust program as per instruction
-    restore(&mut program);
-
-    while program[pc] != 99 {
-        execute(&mut program, &mut pc);
+    if progresult("1,0,0,0,99", 0, 0) != 2 {
+        return Err(io::Error::new(io::ErrorKind::Other, "something went wrong"));
     }
 
-    println!("End encountered at position {}", pc);
+    println!("Result of Part 1 is: {}", progresult(&line, 12, 2));
 
-    let result: String = program
-        .iter()
-        .map(|&n| n.to_string())
-        .intersperse(",".to_string())
-        .collect();
-    println!("End state: {}", result);
+    let desired_output: i64 = 19690720;
+
+    for noun in 0..=99 {
+        for verb in 0..=99 {
+            if progresult(&line, noun, verb) == desired_output {
+                println!(
+                    "Result of part 2 is: Noun {} Verb {} - final result {}",
+                    noun,
+                    verb,
+                    noun * 100 + verb
+                );
+                return Ok(());
+            }
+        }
+    }
 
     Ok(())
 }
 
 fn execute(prog: &mut Vec<i64>, pc: &mut usize) {
-    println!("{}: {}", *pc, prog[*pc]);
     let store = prog[*pc + 3] as usize;
     let a = prog[prog[*pc + 1] as usize];
     let b = prog[prog[*pc + 2] as usize];
@@ -58,7 +56,20 @@ fn execute(prog: &mut Vec<i64>, pc: &mut usize) {
     *pc += 4;
 }
 
-fn restore(prog: &mut Vec<i64>) {
-    prog[1] = 12;
-    prog[2] = 2;
+fn progresult(prog_string: &str, noun: i64, verb: i64) -> i64 {
+    let mut program: Vec<i64> = prog_string
+        .split(",")
+        .map(|n| n.parse::<i64>().expect("Expected Integer String"))
+        .collect();
+
+    let mut pc: usize = 0;
+
+    // adjust program as per instruction
+    program[1] = noun;
+    program[2] = verb;
+
+    while program[pc] != 99 {
+        execute(&mut program, &mut pc);
+    }
+    return program[0];
 }

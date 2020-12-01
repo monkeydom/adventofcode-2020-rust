@@ -25,16 +25,16 @@ fn main() -> io::Result<()> {
     let mut a = -1;
     let mut b = -1;
 
-    'outer: for number in input_numbers {
-        print!("{} ", number);
+    'outer: for number in &input_numbers {
+        print!("{} ", *number);
         for other in &reversed {
-            let sum = *other + number;
+            let sum = *other + *number;
             if sum < threshold {
-                println!("Sum to low {} + {} = {}", *other, number, sum);
+                println!("Sum to low {} + {} = {}", *other, *number, sum);
                 break;
             } else if sum == threshold {
-                println!("Sum good {} + {} = {}", *other, number, sum);
-                a = number;
+                println!("Sum good {} + {} = {}", *other, *number, sum);
+                a = *number;
                 b = *other;
                 break 'outer;
             }
@@ -43,6 +43,32 @@ fn main() -> io::Result<()> {
 
     println!("");
     println!("Solution Part 1: {} * {} = {}", a, b, a * b);
+
+    let mut c = -1;
+
+    'outer2: for biggest in reversed {
+        for second in &input_numbers {
+            for third in &input_numbers {
+                if second == third {
+                    break;
+                }
+                let sum = biggest + *second + *third;
+
+                if sum > threshold {
+                    break;
+                } else if sum == threshold {
+                    println!("Sum good {} + {} + {} = {}", *second, *third, biggest, sum);
+                    c = biggest;
+                    b = *second;
+                    a = *third;
+                    break 'outer2;
+                }
+            }
+        }
+    }
+
+    println!("Solution Part 2: {} * {} * {} = {}", a, b, c, a * b * c);
+
     println!("Done");
 
     Ok(())

@@ -43,24 +43,24 @@ fn main() -> io::Result<()> {
 
     println!("");
     println!("Solution Part 1: {} * {} = {}", a, b, a * b);
+    println!("");
 
     let mut c = -1;
 
     'outer2: for biggest in reversed {
-        for second in &input_numbers {
-            for third in &input_numbers {
-                if second == third {
-                    break;
-                }
-                let sum = biggest + *second + *third;
+        let mut ascending = input_numbers.clone();
+        while ascending.len() > 0 {
+            let second = ascending.remove(0);
+            for third in &ascending {
+                let sum = biggest + second + *third;
 
                 if sum > threshold {
                     break;
                 } else if sum == threshold {
-                    println!("Sum good {} + {} + {} = {}", *second, *third, biggest, sum);
+                    a = second;
+                    b = *third;
                     c = biggest;
-                    b = *second;
-                    a = *third;
+                    println!("Sum good {} + {} + {} = {}", a, b, c, sum);
                     break 'outer2;
                 }
             }

@@ -28,22 +28,36 @@ pub fn preamble() {
 
     println!("{}", Style::new().bold().paint("=".repeat(line_length)));
 }
- 
+
 fn print_solution(s: &str, part: i8) {
     let line: &[ANSIString] = &[
-        Style::new().bold().underline().paint(format!("Solution Part {}:", part)),
+        Style::new()
+            .bold()
+            .underline()
+            .paint(format!("Solution Part {}:", part)),
         Style::new().paint(" "),
-        Green.bold().paint(s)
+        Green.bold().paint(s),
     ];
 
-    let ansi_line = ANSIStrings(&line);
+    let ansi_line = ANSIStrings(line);
     println!("{}", ansi_line);
 }
 
 pub fn print_solution1(s: &str) {
-    print_solution(s,1);
+    print_solution(s, 1);
 }
 
 pub fn print_solution2(s: &str) {
-    print_solution(s,2);
+    print_solution(s, 2);
+}
+
+pub fn print_key_value(key: &str, value: &str) {
+    let line: &[ANSIString] = &[
+        Style::new().italic().paint(format!("{}:", key)),
+        Style::new().paint(" "),
+        Style::new().bold().paint(value),
+    ];
+
+    let ansi_line = ANSIStrings(line);
+    println!("{}", ansi_line);
 }

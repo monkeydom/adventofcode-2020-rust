@@ -9,7 +9,7 @@ use std::fmt;
 
 fn main() {
     aoc::preamble();
-    part1();
+    // part1();
     part2();
 }
 
@@ -66,7 +66,7 @@ fn parse_rule(line: String) -> BagContents {
 }
 
 fn part1() {
-//    let result = "None Yet";
+    //    let result = "None Yet";
 
     let contents: Vec<BagContents> = file::lines().map(|l| parse_rule(l)).collect();
 
@@ -93,7 +93,6 @@ fn part1() {
         } else {
             break;
         }
-
     }
 
     let result = hash_set.len() - 1;
@@ -103,5 +102,58 @@ fn part1() {
 
 fn part2() {
     let result = "None Yet";
-    aoc::print_solution2(format!("{} ", result).as_str());
+
+    let contents: Vec<BagContents> = file::lines().map(|l| parse_rule(l)).collect();
+
+    let mut containment_count = HashMap::new();
+
+    let gold_bag = BagType::from_strings(&["shiny", "gold"]);
+
+    let mut cc = &mut containment_count;
+    let mut update = |mcc: &mut HashMap<BagType, i64>, bt: &BagType, count: i64| {
+        mcc.insert(bt.clone(), mcc.get(bt).unwrap_or(&0) + count);
+    };
+
+    for bc in contents.iter() {
+        if bc.contents.len() == 0 {
+            println!("LEN 0 ! {:?}", bc);
+            update(&mut cc, &bc.bt, 0);
+        }
+    }
+
+    let mut iteration = 1;
+    loop {
+        let mut unknown_count = 0;
+        let mut updated_some = false;
+        for bc in contents.iter() {
+            if let None = cc.get(&bc.bt) {
+                if bc.contents.iter().all(|bt| cc.get(&bt).is_some()) {
+                    updated_some = true;
+                    let value = bc
+                        .contents
+                        .iter()
+                        .fold(0, |acc, v| acc + cc.get(v).unwrap() + 1);
+                    println!("{:?} -> updating with value  {}", &bc.bt, value);
+                    update(cc, &bc.bt, value);
+                } else {
+                    println!("unknown {:?}", &bc.bt);
+                    unknown_count += 1;
+                }
+            }
+        }
+        if !updated_some {
+            break;
+        }
+        println!(
+            "====== {} iteration [uk: {}] ======",
+            iteration, unknown_count
+        );
+        iteration += 1;
+    }
+
+    //    println!("{:?}", containment_count);
+
+    let result = containment_count.get(&gold_bag);
+
+    aoc::print_solution2(format!("{:?} ", result).as_str());
 }

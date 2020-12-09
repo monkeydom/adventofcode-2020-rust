@@ -112,3 +112,12 @@ fn part2() {
 
     aoc::print_solution2(format!("{:?} ", result).as_str());
 }
+
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn simple_test_1() {
+        assert_eq!(2+2, 4);
+    }
+}

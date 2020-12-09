@@ -15,24 +15,27 @@ mod file;
 fn main() {
     aoc::preamble();
     part1();
-    part2();
+    //    part2();
 }
 
 fn part1() {
     //let result = "None Yet";
 
     let numbers = parse_numbers(file::lines());
-    let result = find_first_invalid(numbers, 25);
+    let result = find_first_invalid(&numbers, 25);
 
     aoc::print_solution1(format!("{:?}", result).as_str());
+
+    let result2 = find_contignuous_sum(&numbers, result);
+    aoc::print_solution2(format!("{:?} => {} ", result2, result2.0 + result2.1).as_str());
 }
 
-fn part2() {
-    let result = "None Yet";
-    aoc::print_solution2(format!("{:?} ", result).as_str());
-}
+// fn part2() {
+//     let result = "None Yet";
+//     aoc::print_solution2(format!("{:?} ", result).as_str());
+// }
 
-fn find_first_invalid(numbers: Vec<i64>, window: usize) -> i64 {
+fn find_first_invalid(numbers: &Vec<i64>, window: usize) -> i64 {
     for location in window..numbers.len() {
         let mut tested_positive = false;
         // check number
@@ -62,6 +65,33 @@ where
     lines
         .map(|l| l.parse::<i64>().expect("Needs to be a parseable number"))
         .collect()
+}
+
+fn find_contignuous_sum(numbers: &Vec<i64>, target: i64) -> (i64, i64) {
+    let mut lower = 0usize;
+    let mut upper = 1usize;
+    let mut sum = numbers[lower] + numbers[upper];
+
+    let number_len = numbers.len();
+
+    loop {
+        if sum == target {
+            return (
+                *numbers[lower..=upper].iter().min().unwrap(),
+                *numbers[lower..=upper].iter().max().unwrap(),
+            );
+        } else if sum < target && upper < number_len {
+            upper += 1;
+            sum += numbers[upper];
+        } else if sum > target && upper > lower + 1 {
+            sum -= numbers[lower];
+            lower += 1;
+        } else {
+            break;
+        }
+    }
+
+    (-1, -1)
 }
 
 // note
@@ -101,8 +131,14 @@ mod tests {
     }
 
     #[test]
-    fn simple_test_1() {
+    fn test_find_first_invalid() {
         let numbers = parse_numbers(test_lines());
-        assert_eq!(find_first_invalid(numbers, 5), 127);
+        assert_eq!(find_first_invalid(&numbers, 5), 127);
+    }
+
+    #[test]
+    fn test_find_contignuous_sum() {
+        let numbers = parse_numbers(test_lines());
+        assert_eq!(find_contignuous_sum(&numbers, 127), (15, 47));
     }
 }

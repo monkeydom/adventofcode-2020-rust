@@ -9,7 +9,7 @@ mod file;
 // use ansi_term::Colour::Red;
 // use std::{collections::HashSet, ops::RangeBounds};
 // use std::collections::HashMap;
-use std::collections::HashSet;
+// use std::collections::HashSet;
 // use std::fmt;
 
 fn main() {
@@ -19,7 +19,11 @@ fn main() {
 }
 
 fn part1() {
-    let result = "None Yet";
+    //let result = "None Yet";
+
+    let numbers = parse_numbers(file::lines());
+    let result = find_first_invalid(numbers, 25);
+
     aoc::print_solution1(format!("{:?}", result).as_str());
 }
 

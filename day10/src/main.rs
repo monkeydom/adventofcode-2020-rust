@@ -8,7 +8,7 @@ mod file;
 // use itertools::Itertools;
 // use ansi_term::Colour::Red;
 // use std::{collections::HashSet, ops::RangeBounds};
-// use std::collections::HashMap;
+use std::collections::HashMap;
 // use std::collections::HashSet;
 // use std::fmt;
 
@@ -29,9 +29,8 @@ fn part1() {
     aoc::print_solution1(format!("{:?}", result).as_str());
 
     let result = count_possibilities(&jolts);
-    
-    aoc::print_solution2(format!("{:?} ", result).as_str());
 
+    aoc::print_solution2(format!("{:?} ", result).as_str());
 }
 
 // fn part2() {
@@ -50,23 +49,34 @@ fn jolt_distances(jolts: &Vec<i64>) -> (i64, i64, i64) {
     (one, two, three)
 }
 
-fn count_possibilities_r(jolt: i64, jolts: &[i64]) -> usize {
+fn count_possibilities_r(
+    jolt: i64,
+    jolts: &[i64],
+    mut result_cache: &mut HashMap<i64, usize>,
+) -> usize {
     //println!("{}", jolt);
-    let mut result = 0;
-    if jolts.len() <= 1 { return 1; }
-    for index in 0..(jolts.len().min(3)) {
-        let v = jolts[index];
+    if let Some(result) = result_cache.get(&jolt) {
+        return *result;
+    } else {
+        let mut result = 0;
+        if jolts.len() <= 1 {
+            return 1;
+        }
+        for index in 0..(jolts.len().min(3)) {
+            let v = jolts[index];
             if v - jolt <= 3 {
-                result += count_possibilities_r(v, &jolts[(index+1)..]);
+                result += count_possibilities_r(v, &jolts[(index + 1)..], &mut result_cache);
             }
-        
+        }
+        result_cache.insert(jolt, result);
+        //    println!("Returning {} from {:?}", result, (jolt, &jolts));
+        result
     }
-//    println!("Returning {} from {:?}", result, (jolt, &jolts));   
-    result 
 }
 
 fn count_possibilities(jolts: &Vec<i64>) -> usize {
-    count_possibilities_r(0, &jolts[..])
+    let mut result_cache: HashMap<i64, usize> = HashMap::new();
+    count_possibilities_r(0, &jolts[..], &mut result_cache)
 }
 
 fn parse_numbers<T>(lines: T) -> Vec<i64>
@@ -157,7 +167,6 @@ mod tests {
         let (one, _, three) = jolt_distances(&jolts);
         assert_eq!((one, three), (22, 10));
     }
-
 
     #[test]
     fn test_short_testset_p2() {

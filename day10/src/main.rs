@@ -19,7 +19,13 @@ fn main() {
 }
 
 fn part1() {
-    let result = "None Yet";
+    // let result = "None Yet";
+    let mut jolts = parse_numbers(file::lines());
+    jolts.sort();
+    println!("!{:?}", jolts);
+    let (one, _, three) = jolt_distances(&jolts);
+
+    let result = one * three;
     aoc::print_solution1(format!("{:?}", result).as_str());
 }
 
@@ -28,6 +34,16 @@ fn part2() {
     aoc::print_solution2(format!("{:?} ", result).as_str());
 }
 
+fn jolt_distances(jolts: &Vec<i64>) -> (i64, i64, i64) {
+    let (one, two, three, _) = jolts.iter().fold((1, 0, 1, -10), |acc, v| match v - acc.3 {
+        1 => (acc.0 + 1, acc.1, acc.2, *v),
+        2 => (acc.0, acc.1 + 1, acc.2, *v),
+        3 => (acc.0, acc.1, acc.2 + 1, *v),
+        _ => (acc.0, acc.1, acc.2, *v),
+    });
+
+    (one, two, three)
+}
 
 fn parse_numbers<T>(lines: T) -> Vec<i64>
 where
@@ -84,15 +100,37 @@ mod tests {
         source.split("\n").map(|l| l.to_string())
     }
 
-    #[test]
-    fn test_find_first_invalid() {
-        let numbers = parse_numbers(test_lines());
-        assert_eq!(1, 127);
+    fn test_lines2() -> impl Iterator<Item = String> {
+        "16
+10
+15
+5
+1
+11
+7
+19
+6
+12
+4"
+        .split("\n")
+        .map(|l| l.to_string())
     }
 
     #[test]
-    fn test_find_contignuous_sum() {
-        let numbers = parse_numbers(test_lines());
-        assert_eq!(1, 22);
+    fn test_short_testset() {
+        let mut jolts = parse_numbers(test_lines2());
+        jolts.sort();
+        println!("!{:?}", jolts);
+        let (one, _, three) = jolt_distances(&jolts);
+        assert_eq!((one, three), (7, 5));
+    }
+
+    #[test]
+    fn test_longer_testset() {
+        let mut jolts = parse_numbers(test_lines());
+        jolts.sort();
+        println!("!{:?}", jolts);
+        let (one, _, three) = jolt_distances(&jolts);
+        assert_eq!((one, three), (22, 10));
     }
 }

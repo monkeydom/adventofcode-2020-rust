@@ -15,7 +15,7 @@ mod file;
 fn main() {
     aoc::preamble();
     part1();
-    part2();
+    // part2();
 }
 
 fn part1() {
@@ -27,12 +27,17 @@ fn part1() {
 
     let result = one * three;
     aoc::print_solution1(format!("{:?}", result).as_str());
+
+    let result = count_possibilities(&jolts);
+    
+    aoc::print_solution2(format!("{:?} ", result).as_str());
+
 }
 
-fn part2() {
-    let result = "None Yet";
-    aoc::print_solution2(format!("{:?} ", result).as_str());
-}
+// fn part2() {
+//     let result = "None Yet";
+//     aoc::print_solution2(format!("{:?} ", result).as_str());
+// }
 
 fn jolt_distances(jolts: &Vec<i64>) -> (i64, i64, i64) {
     let (one, two, three, _) = jolts.iter().fold((1, 0, 1, -10), |acc, v| match v - acc.3 {
@@ -43,6 +48,25 @@ fn jolt_distances(jolts: &Vec<i64>) -> (i64, i64, i64) {
     });
 
     (one, two, three)
+}
+
+fn count_possibilities_r(jolt: i64, jolts: &[i64]) -> usize {
+    //println!("{}", jolt);
+    let mut result = 0;
+    if jolts.len() <= 1 { return 1; }
+    for index in 0..(jolts.len().min(3)) {
+        let v = jolts[index];
+            if v - jolt <= 3 {
+                result += count_possibilities_r(v, &jolts[(index+1)..]);
+            }
+        
+    }
+//    println!("Returning {} from {:?}", result, (jolt, &jolts));   
+    result 
+}
+
+fn count_possibilities(jolts: &Vec<i64>) -> usize {
+    count_possibilities_r(0, &jolts[..])
 }
 
 fn parse_numbers<T>(lines: T) -> Vec<i64>
@@ -132,5 +156,24 @@ mod tests {
         println!("!{:?}", jolts);
         let (one, _, three) = jolt_distances(&jolts);
         assert_eq!((one, three), (22, 10));
+    }
+
+
+    #[test]
+    fn test_short_testset_p2() {
+        let mut jolts = parse_numbers(test_lines2());
+        jolts.sort();
+        println!("!{:?}", jolts);
+        let result = count_possibilities(&jolts);
+        assert_eq!(result, 8);
+    }
+
+    #[test]
+    fn test_longer_testset_p2() {
+        let mut jolts = parse_numbers(test_lines());
+        jolts.sort();
+        println!("!{:?}", jolts);
+        let result = count_possibilities(&jolts);
+        assert_eq!(result, 19208);
     }
 }

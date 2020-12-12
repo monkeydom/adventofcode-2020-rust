@@ -250,15 +250,21 @@ fn part1() {
         //println!("{} -> {:?}", &line, ns)
     }
 
-    let result = format!("{:?} => {}", ns, ns.loc.manhattan_distance());
+    let result = format!("{:?} => {}", ns, ns.manhattan_distance());
 
     aoc::print_solution1(format!("{:?}", result).as_str());
 }
 
 fn part2() {
-    let result = "None Yet";
+    // let result = "None Yet";
 
-    //    let mut wp =
+    let mut ns = NavStateTwo::new();
+    for line in file::lines() {
+        ns.perform_line(&line[..]);
+        //println!("{} -> {:?}", &line, ns)
+    }
+
+    let result = format!("{:?} => {}", ns, ns.manhattan_distance());
     aoc::print_solution2(format!("{:?} ", result).as_str());
 }
 

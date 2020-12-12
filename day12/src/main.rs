@@ -133,7 +133,15 @@ fn main() {
 }
 
 fn part1() {
-    let result = "None Yet";
+    // let result = "None Yet";
+    let mut ns = NavState::new();
+    for line in file::lines() {
+        ns.perform_line(&line[..]);
+        //println!("{} -> {:?}", &line, ns)
+    }
+
+    let result = format!("{:?} => {}", ns, ns.loc.manhattan_distance());
+
     aoc::print_solution1(format!("{:?}", result).as_str());
 }
 

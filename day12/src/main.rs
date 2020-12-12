@@ -12,10 +12,45 @@ mod file;
 // use std::collections::HashSet;
 // use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 struct Location {
     x: i64,
     y: i64,
+}
+
+use std::ops::{Add, Mul, Sub};
+
+impl Add<Location> for Location {
+    type Output = Location;
+
+    fn add(self, rhs: Self) -> Self {
+        Self {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+impl Sub<Location> for Location {
+    type Output = Location;
+
+    fn sub(self, rhs: Self) -> Self {
+        Self {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
+    }
+}
+
+impl Mul<i64> for Location {
+    type Output = Location;
+
+    fn mul(self, rhs: i64) -> Self {
+        Self {
+            x: self.x * rhs,
+            y: self.y * rhs,
+        }
+    }
 }
 
 impl Location {
@@ -25,6 +60,40 @@ impl Location {
 
     fn manhattan_distance(&self) -> i64 {
         self.x.abs() + self.y.abs()
+    }
+
+    fn directional_move(&mut self, dir: Direction, amount: i64) {
+        use Direction::*;
+        match dir {
+            North => self.y += amount,
+            South => self.y -= amount,
+            West => self.x -= amount,
+            East => self.x += amount,
+        }
+    }
+
+    fn rotate_steps_around(&mut self, steps: i64, loc: &Location) {
+        let unit = *self - *loc;
+        match steps {
+            2 | -2 => *self = *loc + (unit * -1),
+            1 | -3 => *self = *loc + unit.r(),
+            3 | -1 => *self = *loc + unit.l(),
+            _ => (),
+        }
+    }
+
+    fn l(&self) -> Self {
+        Location {
+            x: self.y * -1,
+            y: self.x,
+        }
+    }
+
+    fn r(&self) -> Self {
+        Location {
+            x: self.y,
+            y: self.x * -1,
+        }
     }
 }
 
@@ -116,13 +185,54 @@ impl NavState {
     }
 
     fn r#move(&mut self, dir: Direction, amount: i64) {
-        use Direction::*;
-        match dir {
-            North => self.loc.y += amount,
-            South => self.loc.y -= amount,
-            West => self.loc.x -= amount,
-            East => self.loc.x += amount,
+        self.loc.directional_move(dir, amount);
+    }
+
+    fn manhattan_distance(&self) -> i64 {
+        self.loc.manhattan_distance()
+    }
+}
+
+#[derive(Debug)]
+struct NavStateTwo {
+    loc: Location,
+    wp: Location,
+}
+
+impl NavStateTwo {
+    fn new() -> Self {
+        NavStateTwo {
+            loc: Location::new(),
+            wp: Location { x: 10, y: 1 },
         }
+    }
+
+    fn perform_line(&mut self, line: &str) {
+        let amount: i64 = (line[1..])
+            .parse()
+            .expect("Needs to be a parseable integer");
+        match line.chars().nth(0).unwrap() {
+            'F' => {
+                let unit = self.wp - self.loc;
+                let movement = unit * amount;
+                self.loc = self.loc + movement;
+                self.wp = self.wp + movement;
+            }
+            c @ 'E' | c @ 'S' | c @ 'N' | c @ 'W' => {
+                self.wp.directional_move(Direction::from_char(c), amount);
+            }
+            'L' => {
+                self.wp.rotate_steps_around(amount / -90, &self.loc);
+            }
+            'R' => {
+                self.wp.rotate_steps_around(amount / 90, &self.loc);
+            }
+            a => panic!("Unexpected instruction {}", a),
+        };
+    }
+
+    fn manhattan_distance(&self) -> i64 {
+        self.loc.manhattan_distance()
     }
 }
 
@@ -147,6 +257,8 @@ fn part1() {
 
 fn part2() {
     let result = "None Yet";
+
+    //    let mut wp =
     aoc::print_solution2(format!("{:?} ", result).as_str());
 }
 
@@ -190,6 +302,35 @@ mod tests {
             ns.perform_line(&line[..]);
             println!("{} -> {:?}", &line, ns)
         }
-        assert_eq!(ns.loc.manhattan_distance(), 25);
+        assert_eq!(ns.manhattan_distance(), 25);
+    }
+
+    #[test]
+    fn test_part2() {
+        let lines: Vec<String> = test_lines().collect();
+        println!("!{:?}", lines);
+        let mut ns = NavStateTwo::new();
+        println!("Starting point {:?}", ns);
+        for line in test_lines() {
+            ns.perform_line(&line[..]);
+            println!("{} -> {:?}", &line, ns)
+        }
+        assert_eq!(ns.manhattan_distance(), 286);
+    }
+
+    #[test]
+    fn test_location_rotation() {
+        let loc = Location { x: 10, y: 1 };
+        assert_eq!(loc, loc.r().l());
+        assert_eq!(loc * -1, loc.r().r());
+        assert_eq!(loc.l(), loc.r().r().r());
+        assert_eq!(loc.r(), loc.l().l().l());
+    }
+
+    #[test]
+    fn test_location_addition() {
+        let loc = Location { x: 10, y: 1 };
+        assert_eq!(loc + loc, loc * 2);
+        assert_eq!(loc - loc, Location::new());
     }
 }

@@ -12,6 +12,8 @@ mod file;
 // use std::collections::HashSet;
 // use std::fmt;
 
+use std::cmp::Ordering;
+
 fn main() {
     aoc::preamble();
     // part1();
@@ -24,7 +26,48 @@ fn part1() {
 }
 
 fn part2() {
-    let result = "None Yet";
+    // let result = "None Yet";
+
+    let mut result: i64 = -1;
+
+    let line = file::lines().skip(1).next().unwrap();
+    let mut indexed =
+        line.split(",")
+            .enumerate()
+            .fold(vec![], |mut acc: Vec<(usize, i64)>, (i, s)| {
+                if s != "x" {
+                    acc.push((i, s.parse().unwrap()));
+                }
+                acc
+            });
+
+    indexed.sort_by(|(_, a), (_, b)| b.partial_cmp(&a).unwrap());
+    println!("{:?}", &indexed);
+
+    let mut iteration = 1i64;
+    let mut max_sat= 2usize;
+    loop {
+        let start_baseline = 72;
+        let candidate = (iteration * 379 + 228) * 557 - start_baseline;
+
+
+        let satisfaction = indexed
+        .iter()
+        .filter(|(i, v)| (candidate + (*i as i64)) % v == 0)
+        .count();
+        // check the value
+        if satisfaction == indexed.len() {
+            result = candidate;
+            break;
+        }
+
+        if satisfaction > max_sat {
+            println!("{}: [{}/{}] {}", iteration, satisfaction, indexed.len(), candidate);
+            max_sat = satisfaction;
+        }
+        iteration += 1;
+    }
+
     aoc::print_solution2(format!("{:?} ", result).as_str());
 }
 

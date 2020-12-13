@@ -62,8 +62,28 @@ fn main() {
     part2();
 }
 
+fn stats_at_end() -> (i64,i64) {
+    let state = parse_lines(file::lines());
+    let mut count = 1;
+    let mut prev_stats = seat_stats(&state);
+    let mut state = next_map(&state);
+    let mut current_stats = seat_stats(&state);
+    while prev_stats != current_stats {
+        prev_stats = current_stats;
+        state = next_map(&state);
+        current_stats = seat_stats(&state);
+        println!("Iteration {} stats: {:?}", count, current_stats);
+        count +=1;
+    }
+    println!("End stats {:?}", current_stats);
+    current_stats
+}
+
 fn part1() {
-    let result = "None Yet";
+//    let result = "None Yet";
+
+    let stats = stats_at_end();
+    let result = stats.0;
     aoc::print_solution1(format!("{:?}", result).as_str());
 }
 

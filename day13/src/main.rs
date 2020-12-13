@@ -51,6 +51,11 @@ fn part2() {
         let candidate = (iteration * 379 + 228) * 557 - start_baseline;
 
 
+        // numerical solution to
+        // (x + 72) mod 557 = 0 && (x + 41) mod 379 = 0 && (x + 35) mod 37 =0 && (x + 70) mod 29 == 0 && (x+49) mod 23 == 0 && (x+91) mod 19 == 0 && (x + 58) mod 17 ==0 && (x+54) mod 13 == 0
+        // from wolfram alpha
+        // let candidate = 21875996124463 * iteration + 9205186551494;
+
         let satisfaction = indexed
         .iter()
         .filter(|(i, v)| (candidate + (*i as i64)) % v == 0)

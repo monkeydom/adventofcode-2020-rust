@@ -30,7 +30,9 @@ fn part1() {
 }
 
 fn part2() {
-    let result = "None Yet";
+    // let result = "None Yet";
+    let mem = process_lines_p2(file::lines());
+    let result = sum_memory(&mem);
     aoc::print_solution2(format!("{:?} ", result).as_str());
 }
 
@@ -114,7 +116,7 @@ fn process_lines_p2(lines: impl Iterator<Item = String>) -> HashMap<usize, u64> 
             "mask" => {
                 let pm = parse_mask(parts[1]);
                 all_fluc = all_fluc_from_fluc(&pm.2);
-                println!("{:?} {:?}", &pm, &all_fluc);
+                // println!("{:?} {:?}", &pm, &all_fluc);
                 set_mask = pm.0;
                 clear_mask = pm.1;
             }

@@ -29,7 +29,8 @@ fn part1() {
 }
 
 fn part2() {
-    let result = "None Yet";
+    // let result = "None Yet";
+    let result = solve_part2(file::lines());
     aoc::print_solution2(format!("{:?} ", result).as_str());
 }
 
@@ -56,6 +57,54 @@ fn solve_part1(lines: impl Iterator<Item = String>) -> i64 {
     )
 }
 
+fn solve_part2(lines: impl Iterator<Item = String>) -> i64 {
+    let (mut fields, my_ticket, tickets) = process_lines(lines);
+
+    let valid_tickets: Vec<&Vec<i64>> = tickets
+        .iter()
+        .filter(|t| t.iter().all(|n| is_valid(&fields, *n)))
+        .collect();
+
+    for ticket in &valid_tickets {
+        for (n, value) in ticket.iter().enumerate() {
+            for field in &mut fields {
+                if !field.ranges.iter().any(|r| r.contains(value)) {
+                    field.invalid_positions.insert(n);
+                }
+            }
+        }
+    }
+
+    fields.sort_by(|a, b| b.invalid_positions.len().cmp(&a.invalid_positions.len()));
+
+    let mut ordered_fields: HashMap<usize, &Field> = HashMap::new();
+    let mut allowed_positions: HashSet<usize> = (0..(fields.len())).collect();
+    for field in &fields {
+        let index = allowed_positions
+            .difference(&field.invalid_positions)
+            .last()
+            .unwrap()
+            .clone();
+        ordered_fields.insert(index, field);
+        allowed_positions.remove(&index);
+    }
+
+    println!("{:?} {:?}", &valid_tickets.len(), ordered_fields);
+
+    for i in 0..fields.len() {
+        println!("{:?} -> {:?}", i, ordered_fields[&i]);
+    }
+
+    let mut result = 1;
+    for (n, value) in my_ticket.iter().enumerate() {
+        if ordered_fields[&n].name.starts_with("departure") {
+            result *= value;
+        }
+    }
+    result
+}
+
+use std::collections::HashSet;
 use std::ops::RangeInclusive;
 use std::str::FromStr;
 
@@ -63,6 +112,7 @@ use std::str::FromStr;
 struct Field {
     name: String,
     ranges: Vec<RangeInclusive<i64>>,
+    invalid_positions: HashSet<usize>,
 }
 
 impl FromStr for Field {
@@ -80,7 +130,11 @@ impl FromStr for Field {
             ranges.push(a..=b);
         }
 
-        Ok(Field { name: name, ranges })
+        Ok(Field {
+            name: name,
+            ranges,
+            invalid_positions: HashSet::new(),
+        })
     }
 }
 

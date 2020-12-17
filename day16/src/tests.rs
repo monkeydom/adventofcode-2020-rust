@@ -28,7 +28,28 @@ fn test_lines() -> impl Iterator<Item = String> {
     source.split("\n").map(|l| l.to_string())
 }
 
+fn test_lines_p2() -> impl Iterator<Item = String> {
+    let source = indoc! {"cclass: 0-1 or 4-19
+    row: 0-5 or 8-19
+    seat: 0-13 or 16-19
+    
+    your ticket:
+    11,12,13
+    
+    nearby tickets:
+    3,9,18
+    15,1,5
+    5,14,9
+    99,1,1"};
+    source.split("\n").map(|l| l.to_string())
+}
+
 #[test]
 fn test_part1() {
     assert_eq!(solve_part1(test_lines()), 71);
+}
+
+#[test]
+fn test_part2() {
+    assert_eq!(solve_part2(test_lines_p2()), 1);
 }

@@ -29,7 +29,8 @@ fn part1() {
 }
 
 fn part2() {
-    let result = "None Yet";
+    //    let result = "None Yet";
+    let result = solve_part2(file::lines());
     aoc::print_solution2(format!("{:?} ", result).as_str());
 }
 
@@ -146,4 +147,100 @@ fn solve_part1(lines: impl Iterator<Item = String>) -> i64 {
     state = perform_step(state);
     state = perform_step(state);
     state.len() as i64
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Copy, Clone)]
+struct Point4(i64, i64, i64, i64);
+
+fn solve_part2(lines: impl Iterator<Item = String>) -> i64 {
+    let mut state: HashSet<Point4> = parse_to_state(lines)
+        .iter()
+        .map(|p| Point4(p.0, p.1, p.2, 0))
+        .collect();
+    // println!("{:?}", state);
+    state = perform_step4(state);
+
+    // for y in 0..4 {
+    //     for x in 0..3 {
+    //         print!(
+    //             "{}",
+    //             (if state.contains(&Point4(x, y, 0, 0)) {
+    //                 "#"
+    //             } else {
+    //                 "."
+    //             })
+    //         )
+    //     }
+    //     println!("");
+    // }
+
+    println!("1");
+    // println!("{:?}", state);
+    state = perform_step4(state);
+    println!("2");
+    state = perform_step4(state);
+    println!("3");
+    state = perform_step4(state);
+    println!("4");
+    state = perform_step4(state);
+    println!("5");
+    state = perform_step4(state);
+    println!("6");
+    state.len() as i64
+}
+
+fn perform_step4(state: HashSet<Point4>) -> HashSet<Point4> {
+    let mut result = HashSet::new();
+    let mut adjacents: HashSet<Point4> = HashSet::new();
+
+    for loc in &state {
+        let mut other_count = 0;
+        for p in adjacent_points4(loc) {
+            if state.contains(&p) {
+                other_count += 1;
+            }
+            adjacents.insert(p);
+        }
+        // println!("{:?} = {:?}", loc, other_count);
+        if other_count >= 2 && other_count <= 3 {
+            result.insert(*loc);
+        }
+    }
+
+    for loc in &adjacents {
+        let mut other_count = 0;
+        for p in adjacent_points4(loc) {
+            if state.contains(&p) {
+                other_count += 1;
+            }
+        }
+        if other_count == 3 {
+            result.insert(*loc);
+        }
+        // if loc.2 == 0 && loc.3 == 0 {
+        //     println!("{:?} = {:?}", loc, other_count);
+        // }
+    }
+
+    // println!("New state: {:?}", &result);
+
+    result
+}
+
+fn adjacent_points4(p: &Point4) -> impl Iterator<Item = Point4> {
+    let mut v: Vec<Point4> = Vec::new();
+    for x in -1..=1 {
+        for y in -1..=1 {
+            for z in -1..=1 {
+                for w in -1..=1 {
+                    let c = Point4(x + p.0, y + p.1, z + p.2, w + p.3);
+                    if c != *p {
+                        v.push(c);
+                    }
+                }
+            }
+        }
+    }
+
+    v.into_iter()
 }
